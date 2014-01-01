@@ -16,8 +16,9 @@ self.addEventListener('message',function(event){
       for(y=0;y<chunk.width/tileSize;y++) {
           var row=[];
           for(x=0;x<chunk.height/tileSize;x++) {
-              var runX = (event.data.x*chunk.width/tileSize+x)
-              var runY = (event.data.y*chunk.height/tileSize+y)
+
+              var runX = (event.data.x*chunk.width/tileSize+x);
+              var runY = (event.data.y*chunk.height/tileSize+y);
               row.push(worldGen.point(runX, runY));
           }
           result.push(row);

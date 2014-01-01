@@ -1,4 +1,7 @@
-var engine={};
+var engine={
+    canvas: null,
+    context: null
+};
 
 engine.camera={
     x:0,
@@ -8,18 +11,16 @@ engine.camera={
 };
 
 engine.world={
-    canvas: null,
-    context: null,
     seed: "overwriteme",
-    numWorkers: 8,
+    numWorkers: 4,
     workers: [],
     chunk: {
-        tileSize: 16,
-        width: 160,
-        height: 160,
+        tileSize:8,
+        width:160,
+        height:160,
         draw:function(x,y){
             if(typeof engine.world.chunk.cache[x+','+y]!="undefined") {
-                engine.world.context.drawImage(
+                engine.context.drawImage(
                     engine.world.chunk.cache[x+','+y],
                     x*engine.world.chunk.width-engine.camera.x,
                     y*engine.world.chunk.height-engine.camera.y,
@@ -30,7 +31,8 @@ engine.world={
                 engine.world.chunk.cache[x+','+y]=new Image();
                 engine.world.workers[engine.world.workers.current].postMessage({
                     x:x,
-                    y:y
+                    y:y,
+                    tileSize:engine.world.chunk.tileSize
                 });
                 engine.world.workers.current++;
                 if(engine.world.workers.current>=engine.world.numWorkers) {
@@ -79,8 +81,8 @@ engine.world={
         engine.world.seed=opts.seed||engine.world.seed;
         engine.world.numWorkers=opts.numWorkers||engine.world.numWorkers;
 
-        engine.world.canvas=document.getElementById('world');
-        engine.world.context=engine.world.canvas.getContext('2d');
+        engine.canvas=document.getElementById('world');
+        engine.context=engine.canvas.getContext('2d');
 
         for(i=0;i<engine.world.numWorkers;i++) {
             engine.world.workers[i]=new Worker('js/lib/worldRenderWorker.js');
@@ -114,13 +116,20 @@ engine.debug={
     frame:0,
     fps:function(){
         var fps=document.getElementById('fps');
-        if(fps) {
-            var lastFrame=engine.debug.frame;
-            setInterval(function(){
-                fps.innerHTML=engine.debug.frame-lastFrame;
-                lastFrame=engine.debug.frame;
-            }, 1000);
+        if(!fps) {
+            fps=document.createElement('div');
+            fps.id='fps';
+            document.body.appendChild(fps);
+            fps.style.position='absolute';
+            fps.style.left='0';
+            fps.style.top='0';
         }
+        
+        var lastFrame=engine.debug.frame;
+        setInterval(function(){
+            fps.innerHTML=engine.debug.frame-lastFrame;
+            lastFrame=engine.debug.frame;
+        },1000);
     }
 };
 
